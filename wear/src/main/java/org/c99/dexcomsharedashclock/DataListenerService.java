@@ -28,6 +28,7 @@ public class DataListenerService extends WearableListenerService {
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContentTitle("Blood Glucose")
                     .setContentText(value + " mg/dL")
+                    .setPriority((value < 90 || value > 200)?Notification.PRIORITY_HIGH:Notification.PRIORITY_LOW)
                     .extend(new Notification.WearableExtender()
                             .setDisplayIntent(PendingIntent.getActivity(this, 0, displayIntent, PendingIntent.FLAG_UPDATE_CURRENT)))
                     .build();
