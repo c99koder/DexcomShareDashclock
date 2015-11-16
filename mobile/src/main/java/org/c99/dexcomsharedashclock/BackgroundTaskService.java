@@ -26,20 +26,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class BackgroundTaskService extends GcmTaskService {
     private static final String TASK_GLUCOSE = "org.c99.TASK_GLUCOSE";
-    private static final String TASK_LOGIN = "org.c99.TASK_LOGIN";
 
     public static void scheduleGlucoseSync(Context context) {
         GcmNetworkManager.getInstance(context).cancelAllTasks(BackgroundTaskService.class);
         GcmNetworkManager.getInstance(context).schedule(new PeriodicTask.Builder()
                         .setTag(TASK_GLUCOSE)
                         .setPeriod(60 * 15)
-                        .setPersisted(true)
-                        .setService(BackgroundTaskService.class)
-                        .build()
-        );
-        GcmNetworkManager.getInstance(context).schedule(new PeriodicTask.Builder()
-                        .setTag(TASK_LOGIN)
-                        .setPeriod(60 * 60)
                         .setPersisted(true)
                         .setService(BackgroundTaskService.class)
                         .build()
@@ -59,12 +51,13 @@ public class BackgroundTaskService extends GcmTaskService {
                     final int value = o.getInt("Value");
                     String WT = o.getString("WT");
                     final long time = Long.valueOf(WT.substring(6, WT.length() - 2));
+                    Log.i("DexcomShareDashclock", "Latest glucose reading: " + value + " mg/dL");
 
                     SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
                     editor.putInt("Trend", trend);
                     editor.putInt("Value", value);
                     editor.putLong("Time", time);
-                    editor.commit();
+                    editor.apply();
 
                     final GoogleApiClient googleApiClient = new GoogleApiClient.Builder(context)
                             .addApi(Wearable.API)
@@ -101,8 +94,6 @@ public class BackgroundTaskService extends GcmTaskService {
     @Override
     public int onRunTask(TaskParams taskParams) {
         if(taskParams.getTag().equals(TASK_GLUCOSE)) {
-            return runGlucoseSync(this);
-        } else if(taskParams.getTag().equals(TASK_LOGIN)) {
             try {
                 Dexcom dexcom = new Dexcom();
                 String token = dexcom.login(PreferenceManager.getDefaultSharedPreferences(this).getString("username", ""),
@@ -112,7 +103,7 @@ public class BackgroundTaskService extends GcmTaskService {
                     SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
                     editor.putString("token", token);
                     editor.apply();
-                    return GcmNetworkManager.RESULT_SUCCESS;
+                    return runGlucoseSync(this);
                 } else {
                     Log.e("Dexcom", "Response: " + token);
                 }
