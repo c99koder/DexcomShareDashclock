@@ -59,6 +59,14 @@ public class LoginActivity extends AppCompatActivity {
         mProgressView = findViewById(R.id.login_progress);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mUsernameView.setText(PreferenceManager.getDefaultSharedPreferences(this).getString("username", ""));
+        mPasswordView.setText(PreferenceManager.getDefaultSharedPreferences(this).getString("password", ""));
+    }
+
     private void attemptLogin() {
         if (mAuthTask != null) {
             return;
@@ -132,6 +140,8 @@ public class LoginActivity extends AppCompatActivity {
                     token = token.substring(1, token.length() - 2); //Strip the "s
                     SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(LoginActivity.this).edit();
                     editor.putString("token", token);
+                    editor.putString("username", mUsername);
+                    editor.putString("password", mPassword);
                     editor.apply();
                     BackgroundTaskService.runGlucoseSync(LoginActivity.this);
                     return true;

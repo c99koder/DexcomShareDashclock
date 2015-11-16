@@ -1,25 +1,19 @@
 package org.c99.dexcomsharedashclock;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.gcm.GcmNetworkManager;
 import com.google.android.gms.gcm.GcmTaskService;
 import com.google.android.gms.gcm.PeriodicTask;
 import com.google.android.gms.gcm.TaskParams;
-import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.DataMap;
-import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import org.json.JSONArray;
@@ -32,12 +26,20 @@ import java.util.concurrent.TimeUnit;
  */
 public class BackgroundTaskService extends GcmTaskService {
     private static final String TASK_GLUCOSE = "org.c99.TASK_GLUCOSE";
+    private static final String TASK_LOGIN = "org.c99.TASK_LOGIN";
 
     public static void scheduleGlucoseSync(Context context) {
         GcmNetworkManager.getInstance(context).cancelAllTasks(BackgroundTaskService.class);
         GcmNetworkManager.getInstance(context).schedule(new PeriodicTask.Builder()
                         .setTag(TASK_GLUCOSE)
-                        .setPeriod(300)
+                        .setPeriod(60 * 15)
+                        .setPersisted(true)
+                        .setService(BackgroundTaskService.class)
+                        .build()
+        );
+        GcmNetworkManager.getInstance(context).schedule(new PeriodicTask.Builder()
+                        .setTag(TASK_LOGIN)
+                        .setPeriod(60 * 60)
                         .setPersisted(true)
                         .setService(BackgroundTaskService.class)
                         .build()
@@ -100,6 +102,23 @@ public class BackgroundTaskService extends GcmTaskService {
     public int onRunTask(TaskParams taskParams) {
         if(taskParams.getTag().equals(TASK_GLUCOSE)) {
             return runGlucoseSync(this);
+        } else if(taskParams.getTag().equals(TASK_LOGIN)) {
+            try {
+                Dexcom dexcom = new Dexcom();
+                String token = dexcom.login(PreferenceManager.getDefaultSharedPreferences(this).getString("username", ""),
+                        PreferenceManager.getDefaultSharedPreferences(this).getString("password", ""));
+                if (token != null && token.length() > 0 && token.startsWith("\"")) {
+                    token = token.substring(1, token.length() - 2); //Strip the "s
+                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+                    editor.putString("token", token);
+                    editor.apply();
+                    return GcmNetworkManager.RESULT_SUCCESS;
+                } else {
+                    Log.e("Dexcom", "Response: " + token);
+                }
+            } catch (Exception e) {
+                return GcmNetworkManager.RESULT_RESCHEDULE;
+            }
         }
         return GcmNetworkManager.RESULT_FAILURE;
     }

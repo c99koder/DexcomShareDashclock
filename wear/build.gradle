@@ -19,10 +19,13 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
-        versionNameSuffix "-" + getRevision()
     }
     buildTypes {
+        debug {
+            versionNameSuffix "-" + getRevision()
+        }
         release {
+            versionNameSuffix "-" + getRevision()
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
