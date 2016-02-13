@@ -2,6 +2,7 @@ package org.c99.dexcomsharedashclock;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -61,7 +62,7 @@ public class GlucoseDisplayActivity extends Activity {
             mValue.setText(getIntent().getIntExtra("value", 0) + " mg/dL");
 
         if(getIntent() != null && getIntent().hasExtra("time"))
-            mTime.setText("Updated "+ SimpleDateFormat.getTimeInstance().format(new Date(getIntent().getLongExtra("time", 0))));
+            mTime.setText("Updated "+ DateUtils.getRelativeTimeSpanString(getIntent().getLongExtra("time", 0), System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS));
 
     }
 }

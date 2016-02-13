@@ -16,30 +16,47 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
-        <service android:name=".BackgroundTaskService"
-                 android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE"
-                 android:exported="true">
+        <service
+            android:name=".BackgroundTaskService"
+            android:exported="true"
+            android:permission="com.google.android.gms.permission.BIND_NETWORK_TASK_SERVICE">
             <intent-filter>
                 <action android:name="com.google.android.gms.gcm.ACTION_TASK_READY"/>
             </intent-filter>
         </service>
-
-        <service android:name=".DashclockExtension"
-                 android:icon="@drawable/ic_dashclock"
-                 android:label="@string/app_name"
-                 android:permission="com.google.android.apps.dashclock.permission.READ_EXTENSION_DATA">
+        <service
+            android:name=".DashclockExtension"
+            android:icon="@drawable/ic_dashclock"
+            android:label="@string/app_name"
+            android:permission="com.google.android.apps.dashclock.permission.READ_EXTENSION_DATA">
             <intent-filter>
-                <action android:name="com.google.android.apps.dashclock.Extension" />
+                <action android:name="com.google.android.apps.dashclock.Extension"/>
             </intent-filter>
-            <meta-data android:name="protocolVersion" android:value="2" />
-            <meta-data android:name="worldReadable" android:value="true" />
-            <meta-data android:name="description"
-                       android:value="Displays your current glucose reading from Dexcom Share" />
+
+            <meta-data
+                android:name="protocolVersion"
+                android:value="2"/>
+            <meta-data
+                android:name="worldReadable"
+                android:value="true"/>
+            <meta-data
+                android:name="description"
+                android:value="Displays your current glucose reading from Dexcom Share"/>
         </service>
+
+        <receiver
+            android:name=".SyncBroadcastReceiver"
+            android:enabled="false"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

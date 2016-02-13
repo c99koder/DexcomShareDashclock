@@ -161,6 +161,7 @@ public class LoginActivity extends AppCompatActivity {
 
             if (success) {
                 BackgroundTaskService.scheduleGlucoseSync(LoginActivity.this);
+                SyncBroadcastReceiver.schedule(LoginActivity.this);
                 Toast.makeText(LoginActivity.this, "Successfully logged into Dexcom Share", Toast.LENGTH_SHORT).show();
                 finish();
             } else {

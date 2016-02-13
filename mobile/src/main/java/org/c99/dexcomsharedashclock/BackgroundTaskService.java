@@ -21,9 +21,6 @@ import org.json.JSONObject;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by sam on 11/15/15.
- */
 public class BackgroundTaskService extends GcmTaskService {
     private static final String TASK_GLUCOSE = "org.c99.TASK_GLUCOSE";
 
@@ -42,8 +39,13 @@ public class BackgroundTaskService extends GcmTaskService {
         Dexcom dexcom = new Dexcom();
 
         try {
-            String token = PreferenceManager.getDefaultSharedPreferences(context).getString("token", "");
-            if(token.length() > 0) {
+            String token = dexcom.login(PreferenceManager.getDefaultSharedPreferences(context).getString("username", ""),
+                    PreferenceManager.getDefaultSharedPreferences(context).getString("password", ""));
+            if (token != null && token.length() > 0 && token.startsWith("\"")) {
+                token = token.substring(1, token.length() - 2); //Strip the "s
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+                editor.putString("token", token);
+                editor.apply();
                 JSONArray a = dexcom.latestGlucoseValues(token, 1440, 1);
                 if(a != null && a.length() > 0) {
                     JSONObject o = a.getJSONObject(0);
@@ -53,7 +55,6 @@ public class BackgroundTaskService extends GcmTaskService {
                     final long time = Long.valueOf(WT.substring(6, WT.length() - 2));
                     Log.i("DexcomShareDashclock", "Latest glucose reading: " + value + " mg/dL");
 
-                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
                     editor.putInt("Trend", trend);
                     editor.putInt("Value", value);
                     editor.putLong("Time", time);
@@ -83,6 +84,8 @@ public class BackgroundTaskService extends GcmTaskService {
                     googleApiClient.disconnect();
                     return GcmNetworkManager.RESULT_SUCCESS;
                 }
+            } else {
+                Log.e("Dexcom", "Response: " + token);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,19 +97,10 @@ public class BackgroundTaskService extends GcmTaskService {
     @Override
     public int onRunTask(TaskParams taskParams) {
         if(taskParams.getTag().equals(TASK_GLUCOSE)) {
+            SyncBroadcastReceiver.schedule(this);
+
             try {
-                Dexcom dexcom = new Dexcom();
-                String token = dexcom.login(PreferenceManager.getDefaultSharedPreferences(this).getString("username", ""),
-                        PreferenceManager.getDefaultSharedPreferences(this).getString("password", ""));
-                if (token != null && token.length() > 0 && token.startsWith("\"")) {
-                    token = token.substring(1, token.length() - 2); //Strip the "s
-                    SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
-                    editor.putString("token", token);
-                    editor.apply();
-                    return runGlucoseSync(this);
-                } else {
-                    Log.e("Dexcom", "Response: " + token);
-                }
+                return runGlucoseSync(this);
             } catch (Exception e) {
                 return GcmNetworkManager.RESULT_RESCHEDULE;
             }
