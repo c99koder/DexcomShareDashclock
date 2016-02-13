@@ -6,9 +6,6 @@ import android.text.format.DateUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 public class GlucoseDisplayActivity extends Activity {
 
     private TextView mValue;

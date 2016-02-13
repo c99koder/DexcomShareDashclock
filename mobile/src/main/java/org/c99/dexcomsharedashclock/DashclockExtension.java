@@ -5,17 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.preference.PreferenceManager;
+import android.text.format.DateUtils;
 
 import com.google.android.apps.dashclock.api.DashClockExtension;
 import com.google.android.apps.dashclock.api.ExtensionData;
 
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-/**
- * Created by sam on 11/15/15.
- */
 public class DashclockExtension extends DashClockExtension {
     public final static String REFRESH_INTENT = "org.c99.dexcomsharedashclock.REFRESH";
     RefreshReceiver receiver;
@@ -93,7 +89,7 @@ public class DashclockExtension extends DashClockExtension {
                                 .icon(icon)
                                 .status(NumberFormat.getInstance().format(value))
                                 .expandedTitle(NumberFormat.getInstance().format(value) + " mg/dL")
-                                .expandedBody("Updated " + SimpleDateFormat.getTimeInstance().format(new Date(time)))
+                                .expandedBody("Updated " + DateUtils.getRelativeTimeSpanString(time, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS))
                                 .clickIntent(i)
                 );
             } else {
