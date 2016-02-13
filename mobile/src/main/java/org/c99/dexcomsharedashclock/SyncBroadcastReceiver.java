@@ -43,13 +43,13 @@ public class SyncBroadcastReceiver extends BroadcastReceiver {
         Intent intent = new Intent(context, SyncBroadcastReceiver.class);
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
-        alarmMgr.cancel(alarmIntent);
-
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            alarmMgr.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + interval, alarmIntent);
+            alarmMgr.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + interval, alarmIntent);
         } else {
-            alarmMgr.setAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + interval, alarmIntent);
+            alarmMgr.setExactAndAllowWhileIdle(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + interval, alarmIntent);
         }
+
+        Log.d("DexcomShareDashclock", "Sync scheduled in " + (int)(interval/60000) + " minutes");
     }
 
     @Override
