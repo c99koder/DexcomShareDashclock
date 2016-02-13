@@ -143,7 +143,6 @@ public class LoginActivity extends AppCompatActivity {
                     editor.putString("username", mUsername);
                     editor.putString("password", mPassword);
                     editor.apply();
-                    BackgroundTaskService.runGlucoseSync(LoginActivity.this);
                     return true;
                 } else {
                     Log.e("Dexcom", "Response: " + token);
@@ -160,8 +159,7 @@ public class LoginActivity extends AppCompatActivity {
             showProgress(false);
 
             if (success) {
-                BackgroundTaskService.scheduleGlucoseSync(LoginActivity.this);
-                SyncBroadcastReceiver.schedule(LoginActivity.this);
+                SyncBroadcastReceiver.schedule(LoginActivity.this, 1);
                 Toast.makeText(LoginActivity.this, "Successfully logged into Dexcom Share", Toast.LENGTH_SHORT).show();
                 finish();
             } else {
